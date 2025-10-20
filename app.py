@@ -103,7 +103,6 @@ lot_size_acres = st.number_input("Lot Size (acres)", min_value=0.0, max_value=10
 # 6. Bulit in year
 year_built = st.number_input("Bulit in year", min_value=1850, max_value=2025, value=1995, step=1)
 age = 2025 - year_built
-st.caption(f"Computed Age: {age} years")
 
 # 7. Total Parking Space
 parking_total = st.number_input("Total Parking Space", min_value=0, max_value=20, value=2, step=1)
@@ -112,15 +111,15 @@ parking_total = st.number_input("Total Parking Space", min_value=0, max_value=20
 garage_spaces = st.number_input("Garage Spaces", min_value=0, max_value=10, value=2, step=1)
 
 # 9. City
-city = st.selectbox("City", options=["<unseen>"] + TRAIN_CITIES, index=0, help="Must match a training city to one-hot encode")
+city = st.selectbox("City", options=["Select a City"] + TRAIN_CITIES, index=0)
 
-# 10. Postal COde (with city-based suggestions)
-postal_suggestions = CITY_POSTALS.get(city, []) if city and city != "<unseen>" else []
+# 10. Postal Code (with city-based suggestions)
+postal_suggestions = CITY_POSTALS.get(city, []) if city != "Select a City" else []
 if postal_suggestions:
     st.markdown(
         "**Postal codes seen for this city:** " + ", ".join(f"`{z}`" for z in postal_suggestions)
     )
-postal = st.text_input("Postal C0de", value="", help="Used to derive GeoCluster")
+postal = st.text_input("Postal Code", value="")
 
 # Predict button
 if st.button("Predict", type="primary"):
@@ -137,7 +136,7 @@ if st.button("Predict", type="primary"):
             "MainLevelBedrooms": main_level_bedrooms,
             "GarageSpaces": garage_spaces,
             "Age": age,
-            "City": None if city == "<unseen>" else city,
+            "City": None if city == "Select a City" else city,
             "PostalCode": postal,
         }
         X = assemble_row(inputs, FEATURE_COLS)
@@ -168,6 +167,6 @@ if st.button("Predict", type="primary"):
 
         # Diagnostics
         active_gc = [c for c in X.columns if c.startswith("GC_") and X.iloc[0][c] == 1]
-        st.caption(f"GeoCluster dummy: {active_gc[0] if active_gc else 'baseline (unknown cluster)'}")
+
         if inputs["City"] and f"City_{inputs['City']}" not in FEATURE_COLS:
             st.warning("City unseen in training. Treated as baseline for City.")
