@@ -120,7 +120,7 @@ if postal_suggestions:
     st.markdown(
         "**Postal codes seen for this city:** " + ", ".join(f"`{z}`" for z in postal_suggestions)
     )
-postal = st.text_input("Postal COde", value="", help="Used to derive GeoCluster")
+postal = st.text_input("Postal C0de", value="", help="Used to derive GeoCluster")
 
 # Predict button
 if st.button("Predict", type="primary"):
