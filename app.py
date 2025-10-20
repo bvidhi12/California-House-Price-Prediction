@@ -137,7 +137,7 @@ if st.button("Predict", type="primary"):
             "MainLevelBedrooms": main_level_bedrooms,
             "GarageSpaces": garage_spaces,
             "Age": age,
-            "City": None if city == "<unseen>" else city,
+            "City": None if city == "Select a City" else city,
             "PostalCode": postal,
         }
         X = assemble_row(inputs, FEATURE_COLS)
