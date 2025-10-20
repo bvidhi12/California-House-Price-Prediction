@@ -5,6 +5,10 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 import plotly.graph_objects as go
+from scipy.stats import gaussian_kde
+import matplotlib.pyplot as plt
+import seaborn as sns
+
 
 
 # ---------- load artifacts ----------
@@ -25,8 +29,6 @@ def load_artifacts():
 
 model, FEATURE_COLS, PC2CLUSTER, EVAL_DF = load_artifacts()
 
-
-model, FEATURE_COLS, PC2CLUSTER, CITY_POSTALS = load_artifacts()
 
 # ---------- helpers ----------
 def build_gc_vector(postal_code, feature_cols, pc2cluster):
@@ -79,6 +81,13 @@ def assemble_row(inputs, feature_columns):
 st.set_page_config(page_title="California House Price Predictor", layout="centered")
 st.title("California House Price Predictor")
 
+st.markdown("""
+* This application uses an **XGBoost** model trained on real estate transaction data from the California Regional Multiple Listing Service (CRMLS).  
+            
+* The goal is to provide you with a data-driven estimate of a property's market value and help you understand how different features influence home prices across California.
+""")
+
+
 st.subheader("Please Input your house details")
 
 # cities seen during training (from dummy columns)
@@ -113,12 +122,7 @@ garage_spaces = st.number_input("Garage Spaces", min_value=0, max_value=10, valu
 # 9. City
 city = st.selectbox("City", options=["Select a city"] + TRAIN_CITIES, index=0)
 
-# 10. Postal Code (with city-based suggestions)
-postal_suggestions = CITY_POSTALS.get(city, []) if city != "Select a city" else []
-if postal_suggestions:
-    st.markdown(
-        "**Postal codes seen for this city:** " + ", ".join(f"`{z}`" for z in postal_suggestions)
-    )
+# 10. Postal Code
 postal = st.text_input("Postal Code", value="")
 
 # Predict button
@@ -142,31 +146,44 @@ if st.button("Predict", type="primary"):
         X = assemble_row(inputs, FEATURE_COLS)
         pred = float(model.predict(X)[0])
 
-        st.success(f"Your predicted house price is ${pred:,.0f}")
+        rounded_pred = round(pred, -3)
+        st.success(f"Your predicted house price is ${rounded_pred:,.0f}")
 
-        # after st.success(f"Your predicted house price is ${pred:,.0f}")
+    
         if inputs["City"] and EVAL_DF is not None:
-            sub = EVAL_DF.loc[EVAL_DF['City'] == inputs["City"]].copy()
-            if not sub.empty:
-                sub = sub.sort_values('Actual').reset_index(drop=True)
-                fig = go.Figure()
-                fig.add_trace(go.Scatter(y=sub['Actual'], mode='lines', name='Actual ClosePrice'))
-                fig.add_trace(go.Scatter(y=sub['Predicted'], mode='lines', name='Predicted ClosePrice'))
-                fig.update_layout(
-                    title=f"Actual vs Predicted — {inputs['City']}",
-                    xaxis_title="Samples (sorted by actual value)",
-                    yaxis_title="ClosePrice",
-                    hovermode="x unified"
-                )
-                st.plotly_chart(fig, use_container_width=True)
-            else:
-                st.info("No evaluation rows for this city in eval_df.")
+            sub = (
+                EVAL_DF.loc[EVAL_DF["City"] == inputs["City"], "Actual"]
+                .dropna()
+                .astype(float)
+            )
+
+        if len(sub) >= 5 and sub.std() > 0:
+            mu, sigma = float(sub.mean()), float(sub.std(ddof=1))
+            nbins = 15
+
+            # histogram
+            fig, ax = plt.subplots(figsize=(6, 4))
+            counts, bins, _ = ax.hist(
+                sub, bins=nbins, color="#add8e6", edgecolor="black", alpha=0.6
+            )
+
+            # normal curve scaled to counts
+            bin_width = bins[1] - bins[0]
+            xs = np.linspace(sub.min(), sub.max(), 400)
+            normal_pdf = (1.0 / (sigma * np.sqrt(2.0 * np.pi))) * np.exp(
+                -0.5 * ((xs - mu) / sigma) ** 2
+            )
+            ax.plot(xs, normal_pdf * len(sub) * bin_width, linewidth=2)
+
+            # predicted marker
+            ax.axvline(rounded_pred, color="red", linestyle="--", linewidth=2,
+                    label=f"Predicted: ${rounded_pred:,.0f}")
+
+            ax.set_title(f"Distribution of ClosePrice — {inputs['City']}")
+            ax.set_xlabel("ClosePrice (in millions)")
+            ax.set_ylabel("Frequency")
+            ax.legend()
+            st.pyplot(fig)
+            plt.close(fig)
         else:
-            st.info("City comparison plot unavailable. Missing city or eval_df.pkl.")
-
-
-        # Diagnostics
-        active_gc = [c for c in X.columns if c.startswith("GC_") and X.iloc[0][c] == 1]
-
-        if inputs["City"] and f"City_{inputs['City']}" not in FEATURE_COLS:
-            st.warning("City unseen in training. Treated as baseline for City.")
+            st.info("Not enough data to fit a normal curve.")
