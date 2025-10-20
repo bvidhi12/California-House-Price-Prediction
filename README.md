@@ -93,8 +93,7 @@ Predict California residential **close prices** using an **XGBoost** model train
 
 ## Streamlit app
 
-**What it does:**
-Takes user inputs, builds feature row, encodes `City` and `GeoCluster` from the provided `PostalCode`, predicts price, **rounds to $1,000**, and shows a **histogram + normal curve** of actual city prices with a vertical line at the prediction.
+[California House Price Prediction](https://bvidhi-california-house-price-prediction.streamlit.app)
 
 **Run locally:**
 
