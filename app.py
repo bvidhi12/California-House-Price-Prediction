@@ -79,7 +79,7 @@ def assemble_row(inputs, feature_columns):
 st.set_page_config(page_title="California House Price Predictor", layout="centered")
 st.title("California House Price Predictor")
 
-st.subheader("Please Input ypur house details")
+st.subheader("Please Input your house details")
 
 # cities seen during training (from dummy columns)
 TRAIN_CITIES = sorted({c.replace("City_", "") for c in FEATURE_COLS if c.startswith("City_")})
