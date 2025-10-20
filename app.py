@@ -92,7 +92,7 @@ bedrooms_total = st.number_input("Total Bedrooms", min_value=0, max_value=20, va
 main_level_bedrooms = st.number_input("Main Level Bedrooms", min_value=0, max_value=10, value=1, step=1)
 
 # 3. Total Bathrooms (integer)
-bathrooms_total_integer = st.number_input("Total Bathrooms", min_value=0, max_value=20, value=2, step=1, format="%d")
+bathrooms_total_integer = st.number_input("Total Bathrooms", min_value=0, max_value=20, value=2, step=0.5, format="%d")
 
 # 4. Living Area (sqft)
 living_area = st.number_input("Living Area (sqft)", min_value=100.0, max_value=20000.0, value=2000.0, step=50.0)
