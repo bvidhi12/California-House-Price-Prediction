@@ -114,7 +114,7 @@ garage_spaces = st.number_input("Garage Spaces", min_value=0, max_value=10, valu
 city = st.selectbox("City", options=["Select a City"] + TRAIN_CITIES, index=0)
 
 # 10. Postal Code (with city-based suggestions)
-postal_suggestions = CITY_POSTALS.get(city, []) if city != "Select a City" else []
+postal_suggestions = CITY_POSTALS.get(city, []) if city != "Select a city" else []
 if postal_suggestions:
     st.markdown(
         "**Postal codes seen for this city:** " + ", ".join(f"`{z}`" for z in postal_suggestions)
