@@ -111,7 +111,7 @@ parking_total = st.number_input("Total Parking Space", min_value=0, max_value=20
 garage_spaces = st.number_input("Garage Spaces", min_value=0, max_value=10, value=2, step=1)
 
 # 9. City
-city = st.selectbox("City", options=["Select a City"] + TRAIN_CITIES, index=0)
+city = st.selectbox("City", options=["Select a city"] + TRAIN_CITIES, index=0)
 
 # 10. Postal Code (with city-based suggestions)
 postal_suggestions = CITY_POSTALS.get(city, []) if city != "Select a city" else []
