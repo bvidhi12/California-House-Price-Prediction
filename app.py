@@ -76,8 +76,8 @@ def assemble_row(inputs, feature_columns):
     return X
 
 # ---------- UI ----------
-st.set_page_config(page_title="House Price Predictor", layout="centered")
-st.title("House Price Predictor")
+st.set_page_config(page_title="California House Price Predictor", layout="centered")
+st.title("California House Price Predictor")
 
 st.subheader("Please Input your house details")
 
